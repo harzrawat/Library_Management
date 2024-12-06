@@ -5,6 +5,20 @@ from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 import pandas as pd
 
+import sys
+print(sys.version)
+import ssl
+import socket
+
+def check_tls_version():
+    context = ssl.create_default_context()
+    connection = context.wrap_socket(socket.socket(), server_hostname="www.google.com")
+    connection.connect(('www.google.com', 443))
+    tls_version = connection.version()
+    print(f"TLS version used: {tls_version}")
+
+check_tls_version()
+
 
 # from pymongo.mongo_client import MongoClient
 # from pymongo.server_api import ServerApi
