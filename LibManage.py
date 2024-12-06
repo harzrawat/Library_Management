@@ -5,29 +5,55 @@ from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 import pandas as pd
 
+
+# from pymongo.mongo_client import MongoClient
+# from pymongo.server_api import ServerApi
+
+# python -m pip install "pymongo[srv]"2
+
+# Send a ping to confirm a successful connection
+
+
+from pymongo import MongoClient
+from pymongo.server_api import ServerApi
+from urllib.parse import quote_plus
+
 class LibraryManagementApp:
-    def __init__(self, connection_string='mongodb://localhost:27017'):
+    def __init__(self, username="harzrawat", password="Harsh@517", cluster="cluster0.uronj.mongodb.net"):
         """
         Initialize MongoDB connection
         """
         try:
-            self.client = MongoClient(connection_string)
-            self.db = self.client['library_db']
+            # Encode username and password
+            encoded_username = quote_plus(username)
+            encoded_password = quote_plus(password)
+
+            # Create URI
+            uri = f"mongodb+srv://{encoded_username}:{encoded_password}@{cluster}/?retryWrites=true&w=majority&appName=Cluster0"
+
+            self.client = MongoClient(uri, server_api=ServerApi('1'))
             
-            # Define collections as attributes
+            # Ping the deployment to confirm connection
+            try:
+                self.client.admin.command('ping')
+                print("Pinged your deployment. You successfully connected to MongoDB!")
+            except Exception as e:
+                print(f"Error pinging MongoDB: {e}")
+
+            # Initialize database and collections
+            self.db = self.client['library_db']
             self.books_collection = self.db['books']
             self.members_collection = self.db['members']
             self.transactions_collection = self.db['transactions']
-            
-            # Also store collections in a dictionary (optional)
             self.collections = {
                 'Books': self.books_collection,
                 'Members': self.members_collection,
                 'Transactions': self.transactions_collection
             }
-        
+
         except pymongo.errors.ConnectionFailure as e:
-            st.error(f"MongoDB connection error: {e}")
+            print(f"MongoDB connection error: {e}")
+
 
 
     def convert_objectid(self, value):
